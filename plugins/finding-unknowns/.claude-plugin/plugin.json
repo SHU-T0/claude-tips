@@ -1,6 +1,6 @@
 {
   "name": "finding-unknowns",
-  "description": "Surface a task's unknowns before, during, and after implementation. Ships a map-unknowns quadrant walk, an implementation-notes deviation log, a merge-time understanding check, and a blind-spot-scout subagent. Based on Anthropic's 'A field guide to Claude Fable: finding your unknowns'.",
+  "description": "Surface a task's unknowns before, during, and after implementation. Ships a map-unknowns quadrant walk, a learn-the-domain teaching pass, an implementation-notes deviation log, a merge-time understanding check, and a blind-spot-scout subagent. Based on Anthropic's 'A field guide to Claude Fable: finding your unknowns'.",
   "version": "0.1.0",
   "author": {
     "name": "shu-t0"

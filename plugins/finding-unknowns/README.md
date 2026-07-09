@@ -16,6 +16,7 @@ model-agnostic: they sharpen work on Sonnet and Opus just as much as Fable.
 | Component | Kind | What it does |
 |---|---|---|
 | `map-unknowns` | skill | A staged walk through the four quadrants of unknowns that ends with a written `unknowns-map.md` and a volatile-first plan — run it *before* implementing. |
+| `learn-the-domain` | skill | When you can't yet judge whether an output is good, have Claude *teach* you the domain — how it works, what "good" looks like, the potholes — before generating options or reacting. |
 | `implementation-notes` | skill | Keep a running `implementation-notes.md` of every deviation, edge case, and judgment call *during* the build. |
 | `verify-understanding` | skill | *After* a change, produce a demo-first explainer plus a quiz, and gate the merge on answering it. |
 | `/unknowns` | command | One-line entry point that kicks off a `map-unknowns` walk on a task. |
@@ -49,9 +50,14 @@ triggers.
 
 ```
 BEFORE ──▶ map-unknowns ──▶ (blind-spot-scout) ──▶ unknowns-map.md + plan
+             └─ can't judge "good"? ──▶ learn-the-domain (get taught first)
 DURING ──▶ implementation-notes.md   (deviations, edge cases, judgment calls)
 AFTER  ──▶ verify-understanding       (demo-first explainer + quiz merge gate)
 ```
+
+Reacting to variations only works once you can recognize good. When you can't —
+you don't know how good it could be, or how the domain even works — `learn-the-domain`
+has Claude teach you first, so you prompt and review from knowledge, not guesses.
 
 ## License
 

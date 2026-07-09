@@ -1,6 +1,6 @@
 ---
 name: map-unknowns
-description: Map a task's unknowns before implementing it — a staged walk through four quadrants (known knowns, known unknowns, unknown knowns, unknown unknowns) that ends with a written unknowns map. Use when a request is ambiguous or underspecified, the codebase or domain is unfamiliar, the work is "I'll know it when I see it" (design, taste), a reference must be understood before porting, or before committing to an implementation plan. The map is not the territory; burn off the fog before writing code.
+description: Map a task's unknowns before implementing it — a staged walk through four quadrants (known knowns, known unknowns, unknown knowns, unknown unknowns) that ends with a written unknowns map. Use when a request is ambiguous or underspecified, the codebase or domain is unfamiliar, the work is "I'll know it when I see it" (design, taste), a reference must be understood before porting, before committing to an implementation plan, or when a long-horizon task keeps coming back wrong — a sign the unknowns, not the model, are the bottleneck. The map is not the territory; burn off the fog before writing code.
 ---
 
 # Map Unknowns
@@ -22,9 +22,13 @@ inspect the repo — before asking anything the code can answer.**
    Habituation decides which unknowns are real: a stranger's blind spots are not
    an expert's. This single disclosure changes everything downstream.
 
-2. **Known knowns — settle the ground.** Inventory what is already certain:
-   constraints living in the repo, decided requirements, sacred contracts that
-   must not break. Write them down; this is what goes straight into the plan.
+2. **Known knowns — settle the ground.** First calibrate scope with a quick
+   brainstorm of what is in and out — a plan that is too narrow or too wide is
+   itself an unknown; Claude surfaces options you would miss but can miss the
+   forest for the trees, so you make the call. Then inventory what is already
+   certain: constraints living in the repo, decided requirements, sacred
+   contracts that must not break. Write them down; this is what goes straight
+   into the plan.
 
 3. **Known unknowns — resolve one at a time.** List the open questions you can
    name. Ask the highest-leverage first — the ones that would change the
@@ -36,7 +40,11 @@ inspect the repo — before asking anything the code can answer.**
    them something concrete to react to: a decisions table, or — for anything
    visual — **three or four genuinely divergent directions built as throwaway
    HTML**, not variations on one. Reaction extracts knowledge the user holds but
-   cannot articulate unprompted.
+   cannot articulate unprompted — but it only works when you can recognize good
+   on sight. When you cannot judge quality even while looking (the "do I know how
+   good this can be?" test), run **learn-the-domain** first; variations you can't
+   rank are noise. Prototypes serve a second job here too: throwaway spikes that
+   test whether an approach is even feasible, not only what looks right.
 
 5. **Unknown unknowns — blind spot pass.** Name it out loud: hunt for what is not
    being considered at all — unstated assumptions, domain conventions this plan
@@ -48,8 +56,10 @@ inspect the repo — before asking anything the code can answer.**
    plus a first implementation plan that **orders the most volatile decisions
    first** (data models, type seams, UX flow — whatever ripples furthest when it
    changes). The map in the user's hands is the *only* done-condition. Do not
-   start implementing here — that is a separate task that begins after the map is
-   handed over.
+   start implementing here — implementation is a separate task, best begun in a
+   **fresh session** that carries the map, the plan, and any prototype as
+   artifacts, so the build runs on a clean context window rather than this worn
+   one.
 
 ## Rules
 
@@ -62,3 +72,8 @@ inspect the repo — before asking anything the code can answer.**
   authority; label a guess as a guess.
 - **Reacting beats imagining** at every stage: concrete artifact first,
   open-ended question last.
+- **Instructions miss in both directions.** Too specific and Claude follows a
+  path it should have pivoted from; too vague and it fills the gap with generic
+  best practices that don't fit this work. Aim for intent plus room to adapt —
+  and treat a wrong result as a signal the unknowns were underspecified, not
+  just that the prompt needs more detail.

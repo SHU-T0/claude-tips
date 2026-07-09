@@ -22,7 +22,9 @@ Given a task, plan, or diff:
 3. Default to surfacing. A weak signal named beats a blind spot kept silent.
 
 Return a ranked list, most consequential first. For each item give: the blind
-spot, the tell that exposed it (a file/line or a concrete scenario), and one
-probe question that would resolve it. Do **not** propose fixes — your job is to
-make the invisible visible, not to patch it. If you find nothing after real
-effort, say so plainly rather than inventing.
+spot, the tell that exposed it (a file/line or a concrete scenario), one or two
+lines of the **domain knowledge the authors would need to reason about it** (a
+blind-spot pass teaches, it does not just flag), and one probe question that
+would resolve it. Do **not** propose fixes — your job is to make the invisible
+visible and understood, not to patch it. If you find nothing after real effort,
+say so plainly rather than inventing.

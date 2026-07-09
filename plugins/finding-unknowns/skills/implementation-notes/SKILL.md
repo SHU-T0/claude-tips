@@ -19,7 +19,9 @@ in real time — capture it while it is cheap, or re-derive it painfully later.
    progress.
 3. Keep each entry to three lines: **Plan** (what it said or assumed), **Did**
    (what you actually did), **Why** (what the territory taught you).
-4. At merge or handoff, feed these notes into the change explainer and the
+4. When the code forces a deviation, **default to the conservative option**, log
+   it, and keep going — do not stall the pass on a reversible call.
+5. At merge or handoff, feed these notes into the change explainer and the
    understanding check (see verify-understanding).
 
 ## Rules
@@ -31,3 +33,6 @@ in real time — capture it while it is cheap, or re-derive it painfully later.
   importer skips them" is.
 - Name the file identically everywhere so the next session and the reviewer both
   find it without hunting.
+- Some notes are a signal to stop, not just record: if the territory shows the
+  plan is solving the wrong problem, re-map the unknowns rather than adapting a
+  plan that no longer fits.

@@ -7,8 +7,9 @@ A small [Claude Code](https://code.claude.com) plugin marketplace.
 ### [finding-unknowns](plugins/finding-unknowns)
 
 Surface a task's unknowns *before, during, and after* implementation — a
-`map-unknowns` quadrant walk, an `implementation-notes` deviation log, a
-merge-time `verify-understanding` check, and a `blind-spot-scout` subagent.
+`map-unknowns` quadrant walk, a `learn-the-domain` teaching pass, an
+`implementation-notes` deviation log, a merge-time `verify-understanding` check,
+and a `blind-spot-scout` subagent.
 Based on Anthropic's *[A field guide to Claude Fable: finding your unknowns](https://claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns)*.
 
 ## Install
