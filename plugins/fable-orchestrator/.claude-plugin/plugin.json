@@ -1,0 +1,12 @@
+{
+  "name": "fable-orchestrator",
+  "description": "Run the main Claude Code session as a Fable commander that delegates implementation, research, testing, and review to Sonnet worker subagents. Ships four Sonnet workers (researcher, coder, test-runner, reviewer), a model-routing doctrine skill, an /orchestrate pipeline command, and an optional fable-coordinator persona for `claude --agent`.",
+  "version": "0.1.0",
+  "author": {
+    "name": "shu-t0"
+  },
+  "homepage": "https://github.com/shu-t0/claude-tips",
+  "repository": "https://github.com/shu-t0/claude-tips",
+  "license": "MIT",
+  "keywords": ["subagents", "orchestration", "model-routing", "fable", "sonnet", "cost-control", "agentic"]
+}

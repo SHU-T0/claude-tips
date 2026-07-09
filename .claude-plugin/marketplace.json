@@ -9,6 +9,11 @@
       "name": "finding-unknowns",
       "source": "./plugins/finding-unknowns",
       "description": "Surface a task's unknowns before, during, and after implementation — a map-unknowns quadrant walk, a learn-the-domain teaching pass, an implementation-notes deviation log, a merge-time understanding check, and a blind-spot-scout subagent."
+    },
+    {
+      "name": "fable-orchestrator",
+      "source": "./plugins/fable-orchestrator",
+      "description": "Run the main session as a Fable commander that delegates implementation, research, testing, and review to Sonnet worker subagents — four Sonnet workers, a model-routing doctrine skill, an /orchestrate pipeline command, and an optional fable-coordinator persona for `claude --agent`."
     }
   ]
 }

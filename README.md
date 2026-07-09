@@ -17,11 +17,22 @@ plugin, written out with a worked example. Turn on GitHub Pages
 (Settings → Pages → `main` / `docs`) to read it at
 `https://shu-t0.github.io/claude-tips/`.
 
+### [fable-orchestrator](plugins/fable-orchestrator)
+
+Run the main session as a **Fable commander** that delegates implementation,
+research, testing, and review to **Sonnet worker subagents** — four Sonnet
+workers (`researcher`, `coder`, `test-runner`, `reviewer`), a `model-routing`
+doctrine skill, an `/orchestrate` pipeline command, and an optional
+`fable-coordinator` persona for `claude --agent`. The expensive top model
+decomposes and judges; cheap Sonnet workers do the heavy reading and editing in
+their own contexts.
+
 ## Install
 
 ```
 /plugin marketplace add shu-t0/claude-tips
 /plugin install finding-unknowns@claude-tips
+/plugin install fable-orchestrator@claude-tips
 ```
 
 > Replace `shu-t0/claude-tips` with your GitHub `owner/repo` if you forked or
@@ -30,8 +41,9 @@ plugin, written out with a worked example. Turn on GitHub Pages
 ## Develop locally
 
 ```
-claude --plugin-dir ./plugins/finding-unknowns   # load without installing
-claude plugin validate .                          # validate the marketplace
+claude --plugin-dir ./plugins/finding-unknowns    # load without installing
+claude --plugin-dir ./plugins/fable-orchestrator   # load without installing
+claude plugin validate .                           # validate the marketplace
 ```
 
 ---
