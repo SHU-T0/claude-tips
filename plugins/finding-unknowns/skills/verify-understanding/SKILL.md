@@ -12,17 +12,20 @@ cheap; a wrong merge is not.
 
 ## Workflow
 
-1. **Explainer, demo first.** Open with the result the reviewer can see — a GIF,
-   a screenshot, or a runnable link — *then* what changed, *then* the parts most
-   likely to be wrong. Lead with proof it works; reviewers approve what they can
-   watch. Pull the risky bits from `implementation-notes.md` (see
-   implementation-notes).
+1. **Bundle a pitch, demo first.** Gather the artifacts — prototype, spec, and
+   `implementation-notes.md` (see implementation-notes) — into one shareable
+   doc, and open with the result the reader can see: a GIF, a screenshot, or a
+   runnable link, *then* what changed, *then* the parts most likely to be wrong.
+   Lead with proof it works; people approve what they can watch. Aim it at
+   buy-in from two readers — a reviewer starting from the same unknowns you did,
+   and an expert checking that the known failure points are closed.
 2. **Quiz.** Write a handful of questions on the change: why this approach, what
    breaks if input X, which contract must hold, what the notes flagged as risky.
    Aim at the load-bearing decisions, not surface facts the diff already shows.
-3. **Gate.** Answer the quiz. **Do not merge until every answer is correct and
-   complete.** A question you cannot answer is an unknown still sitting in the
-   diff — resolve it, then re-quiz.
+3. **Gate.** The party who did *not* write the change answers the quiz — the
+   human when an agent wrote it (see Rules). **Do not merge until every answer is
+   correct and complete.** A question nobody can answer is an unknown still
+   sitting in the diff — resolve it, then re-quiz.
 
 ## Rules
 

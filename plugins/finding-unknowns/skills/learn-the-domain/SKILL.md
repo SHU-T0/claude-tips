@@ -1,6 +1,6 @@
 ---
 name: learn-the-domain
-description: Have Claude teach you a domain before you generate options or commit to an approach — how it works, what "good" looks like, the common potholes, and the prior art. Use when the codebase or domain is unfamiliar, when you cannot yet judge whether an output is good ("do I know how good this can be?"), or before a blind-spot pass so you can prompt and review from knowledge instead of guessing. Reacting to variations only works once you can recognize good; when you can't, get taught first.
+description: Have Claude teach you a domain before you generate options or commit to an approach — how it works, what "good" looks like, the common potholes, and the prior art. Use when you cannot yet judge whether an output is good ("do I know how good this can be?"), when you don't understand how a mechanism or domain actually works, or when you catch yourself picking among options you can't rank. Narrower than map-unknowns, which maps a whole task: this closes one knowledge gap so you can prompt and review from knowledge instead of guessing.
 ---
 
 # Learn the Domain
