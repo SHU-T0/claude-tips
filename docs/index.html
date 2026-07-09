@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>不明点を先に見つける — finding your unknowns 解説と使い方</title>
+<meta name="description" content="Claude 公式ブログ『finding your unknowns』の技術解説と、それを実装した finding-unknowns プラグインの使い方。">
+<style>
+  :root{
+    --ground:#EEF0ED; --surface:#F7F8F5; --surface-2:#FCFDFB;
+    --ink:#182329; --ink-soft:#4E5F66; --ink-faint:#7A8A8F;
+    --line:#D8DED9; --line-strong:#BCC6C1;
+    --accent:#0E7C72; --accent-ink:#0B5B54; --accent-soft:rgba(14,124,114,.09);
+    --signal:#B8482A; --signal-soft:rgba(184,72,42,.09);
+    --font-display:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Iowan Old Style",Palatino,Georgia,serif;
+    --font-body:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic",YuGothic,"Noto Sans JP","Segoe UI",Roboto,sans-serif;
+    --font-mono:"SF Mono","SFMono-Regular","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ground:#0E1619; --surface:#141F23; --surface-2:#19272C;
+      --ink:#E8EDEA; --ink-soft:#9AACB0; --ink-faint:#708287;
+      --line:#26363C; --line-strong:#374B52;
+      --accent:#4ABEB1; --accent-ink:#74D2C6; --accent-soft:rgba(74,190,177,.12);
+      --signal:#E2825A; --signal-soft:rgba(226,130,90,.14);
+    }
+  }
+  :root[data-theme="light"]{
+    --ground:#EEF0ED;--surface:#F7F8F5;--surface-2:#FCFDFB;--ink:#182329;--ink-soft:#4E5F66;--ink-faint:#7A8A8F;
+    --line:#D8DED9;--line-strong:#BCC6C1;--accent:#0E7C72;--accent-ink:#0B5B54;--accent-soft:rgba(14,124,114,.09);
+    --signal:#B8482A;--signal-soft:rgba(184,72,42,.09);
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E1619;--surface:#141F23;--surface-2:#19272C;--ink:#E8EDEA;--ink-soft:#9AACB0;--ink-faint:#708287;
+    --line:#26363C;--line-strong:#374B52;--accent:#4ABEB1;--accent-ink:#74D2C6;--accent-soft:rgba(74,190,177,.12);
+    --signal:#E2825A;--signal-soft:rgba(226,130,90,.14);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-body);
+    font-size:1.075rem;line-height:1.92;font-feature-settings:"palt" 1;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+  ::selection{background:var(--accent-soft)}
+  .col{max-width:44rem;margin:0 auto;padding:0 22px}
+  a{color:var(--accent-ink)}
+
+  header{padding:76px 0 40px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--accent-ink);display:flex;align-items:center;gap:12px}
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--accent)}
+  h1{font-family:var(--font-display);font-weight:600;line-height:1.28;font-size:clamp(1.9rem,5vw,2.9rem);
+    letter-spacing:.01em;margin:20px 0 0}
+  .dek{color:var(--ink-soft);font-size:1.06rem;margin:20px 0 0;line-height:1.85;max-width:38rem}
+  .src{margin-top:26px;font-family:var(--font-mono);font-size:.74rem;color:var(--ink-faint);line-height:1.8}
+  .src a{color:var(--ink-soft)}
+
+  main{padding:8px 0 40px}
+  section{padding:34px 0}
+  h2{font-family:var(--font-display);font-weight:600;font-size:clamp(1.35rem,3vw,1.72rem);line-height:1.4;
+    margin:26px 0 4px;letter-spacing:.01em}
+  h2 .no{font-family:var(--font-mono);font-size:.78rem;color:var(--signal);letter-spacing:.1em;
+    display:block;font-weight:600;margin-bottom:6px}
+  h3{font-size:1.08rem;font-weight:700;margin:30px 0 0}
+  p{margin:1.05em 0}
+  strong{font-weight:700}
+  .lead-in{color:var(--accent-ink);font-weight:700}
+  em{font-style:normal;background:linear-gradient(transparent 62%,var(--accent-soft) 62%);padding:0 .1em;font-weight:600}
+  .sig{color:var(--signal);font-weight:600}
+
+  code{font-family:var(--font-mono);font-size:.85em;background:var(--surface);border:1px solid var(--line);
+    border-radius:4px;padding:1px 5px}
+  pre{font-family:var(--font-mono);font-size:.83rem;line-height:1.7;background:var(--ink);color:var(--ground);
+    border-radius:10px;padding:15px 17px;overflow-x:auto;margin:1.4em 0}
+  @media (prefers-color-scheme:dark){pre{background:#060b0d;color:#cbd8d5}}
+  :root[data-theme="dark"] pre{background:#060b0d;color:#cbd8d5}
+  :root[data-theme="light"] pre{background:#182329;color:#EEF0ED}
+  pre .c{color:#7fb0aa}
+
+  blockquote{margin:1.6em 0;padding:2px 0 2px 20px;border-left:2px solid var(--signal);color:var(--ink);
+    font-size:1.02rem}
+  blockquote .who{display:block;margin-top:8px;font-size:.82rem;color:var(--ink-faint);font-family:var(--font-mono)}
+
+  figure{margin:2em 0;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:20px}
+  figcaption{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--ink-faint);margin-bottom:15px}
+  figcaption b{color:var(--accent-ink);font-weight:600}
+
+  /* map/territory */
+  .mt{display:grid;grid-template-columns:1fr 74px 1fr;gap:0;align-items:stretch}
+  .mt .box{background:var(--surface-2);border:1px solid var(--line-strong);border-radius:11px;padding:15px}
+  .mt .box.t{border-color:var(--accent)}
+  .mt .box h4{margin:0 0 3px;font-family:var(--font-display);font-size:1.02rem;font-weight:600}
+  .mt .box .u{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint)}
+  .mt .box ul{margin:9px 0 0;padding-left:16px;font-size:.85rem;color:var(--ink-soft);line-height:1.7}
+  .mt .gap{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--signal)}
+  .mt .gap .z{font-size:1.3rem;line-height:.9}
+  .mt .gap .l{writing-mode:vertical-rl;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:600;margin:7px 0}
+
+  /* quadrants */
+  .quad{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .q{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:13px 14px}
+  .q.hot{border-color:var(--signal);background:var(--signal-soft)}
+  .q .t{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-faint)}
+  .q h4{margin:3px 0 5px;font-size:.96rem;font-weight:700}
+  .q.hot h4{color:var(--signal)}
+  .q p{margin:0;font-size:.83rem;color:var(--ink-soft);line-height:1.6}
+  .q .m{margin-top:7px;padding-top:7px;border-top:1px dashed var(--line-strong);font-size:.8rem}
+  .q .m b{color:var(--accent-ink)}
+  .q.hot .m b{color:var(--signal)}
+
+  /* skill flow */
+  .flow{display:flex;flex-direction:column;gap:9px}
+  .fr{display:grid;grid-template-columns:82px 1fr;gap:14px;align-items:baseline;padding:11px 0;border-top:1px solid var(--line)}
+  .fr:first-child{border-top:none}
+  .fr .ph{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.06em;text-transform:uppercase;color:var(--signal);font-weight:600}
+  .fr .bd code{white-space:nowrap}
+  .fr .bd .nm{font-family:var(--font-display);font-weight:600}
+  .fr .bd p{margin:2px 0 0;font-size:.86rem;color:var(--ink-soft);line-height:1.6}
+
+  .rule{border:0;border-top:1px solid var(--line);margin:0}
+  footer{padding:40px 0 72px;border-top:1px solid var(--line);color:var(--ink-faint);font-size:.85rem;line-height:1.8}
+  footer a{color:var(--accent-ink);text-decoration:none}
+  footer a:hover{text-decoration:underline}
+  footer .mono{font-family:var(--font-mono);font-size:.72rem;margin-top:18px}
+
+  @media (max-width:600px){
+    .mt{grid-template-columns:1fr}
+    .mt .gap{flex-direction:row;padding:8px 0}
+    .mt .gap .l{writing-mode:horizontal-tb}
+    .quad{grid-template-columns:1fr}
+    .fr{grid-template-columns:1fr;gap:4px}
+    h1{font-size:2rem}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="col">
+    <div class="eyebrow">field notes / finding your unknowns</div>
+    <h1>間違いは、モデルではなく<br>あなたの「不明点」から出る</h1>
+    <p class="dek">Claude 公式の記事 <i>A field guide to Claude Fable: finding your unknowns</i> の技術解説。あわせて、この方法論をそのまま Claude Code で回せるようにした <code>finding-unknowns</code> プラグインの使い方をまとめた。</p>
+    <p class="src">
+      原典 · <a href="https://claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns">claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns</a><br>
+      実装 · <a href="https://github.com/SHU-T0/claude-tips">github.com/SHU-T0/claude-tips</a>
+    </p>
+  </div>
+</header>
+
+<main>
+<div class="col">
+
+<section>
+  <p>Claude に機能を1つ頼む。90分後、自信たっぷりに間違ったものが返ってくる。モデルが馬鹿なわけではない。埋めるべき空白を、あなたが渡さなかっただけだ。Claude はその空白を「たぶんこうだろう」で埋め、その推測が外れた。</p>
+  <p>この空白のことを、元記事は <em>unknowns（不明点）</em> と呼ぶ。そして主張はシンプルだ。モデルが賢くなるほど、作業の質を決めるのはモデルの能力ではなく、あなたが自分の unknowns をどれだけ明確にできるかになる。だからこの記事は、その不明点を<span class="lead-in">実装の前・最中・後に、安く見つける</span>ための手順書になっている。</p>
+</section>
+
+<hr class="rule">
+
+<section>
+  <h2><span class="no">01</span>地図と、実際の土地</h2>
+  <p>手元の地図と、実際の土地は違う。Claude に渡すプロンプト・計画・コンテキストが地図で、実際のコードベース・ドメインの制約・あなたが本当に望んでいるものが土地だ。両者がずれている場所、それが unknowns。Claude がそこに踏み込むと、意図を推測するしかなくなる。任せる範囲が広いほど、踏み込む空白も増える。</p>
+
+  <figure>
+    <figcaption><b>図1</b> &nbsp;地図と土地、その間の霧</figcaption>
+    <div class="mt">
+      <div class="box"><span class="u">MAP · 渡すもの</span><h4>地図</h4><ul><li>プロンプト</li><li>実装計画・仕様</li><li>コンテキスト</li><li>あなたの前提</li></ul></div>
+      <div class="gap"><span class="z">〜</span><span class="l">gap = 不明点</span><span class="z">〜</span></div>
+      <div class="box t"><span class="u">TERRITORY · 実在するもの</span><h4>土地</h4><ul><li>コードの現実</li><li>ドメインの制約</li><li>本当の意図</li><li>暗黙の良し悪し</li></ul></div>
+    </div>
+  </figure>
+
+  <p>厄介なのは、このずれを直すコストが時間とともに跳ね上がる点だ。コードを書く前に気づけば、数分で直る。3つの PR を積んだ後に気づけば、その3つを巻き戻すことになる。仕様のわずかな変更が実装を大きく変えることは珍しくないし、そうなってからの revert は高い。やることは1つに絞られる。<span class="sig">高くつく前に、知らなかったことを見つける。</span></p>
+</section>
+
+<hr class="rule">
+
+<section>
+  <h2><span class="no">02</span>なぜ、いま不明点の話なのか</h2>
+  <p>モデルが賢くなるほど、ボトルネックはモデル側からあなた側へ移る。能力で殴れる範囲が広がると、残るのは「何を作ればいいか」の解像度だ。だから診断のヒューリスティックはこうなる。長時間タスクの結果が間違って返ってきたら、プロンプトの語尾をいじる前に、<em>自分が unknowns を定義しきれていない</em>ことを疑う。多くの場合、直すべきはそこだ。</p>
+  <p>補足しておく。これは Fable 専用の話ではない。ここで出てくる技法（盲点洗い、インタビュー、プロトタイプ、クイズ）は、特定のモデルの機能ではなく協働のやり方だ。Sonnet でも Opus でも同じだけ効く。Fable では unknowns が最大のレバーになる、という順序の問題にすぎない。</p>
+</section>
+
+<hr class="rule">
+
+<section>
+  <h2><span class="no">03</span>不明点を4つに割る</h2>
+  <p>不明点は一枚岩ではない。「自分が認識しているか」と「実際に把握できているか」の2軸で割ると、それぞれ打ち手が変わる。いちばん厄介なのは右下、存在にすら気づいていない領域だ。</p>
+
+  <figure>
+    <figcaption><b>図2</b> &nbsp;4象限と、それぞれの打ち手</figcaption>
+    <div class="quad">
+      <div class="q"><span class="t">認識あり × 把握あり</span><h4>Known knowns</h4><p>プロンプトに書ける。もう手札だ。</p><div class="m"><b>打ち手</b> 計画に書き込む</div></div>
+      <div class="q"><span class="t">認識あり × 把握なし</span><h4>Known unknowns</h4><p>「分かっていない」と自覚のある問い。</p><div class="m"><b>打ち手</b> 1問ずつ潰す</div></div>
+      <div class="q"><span class="t">認識なし × 把握あり</span><h4>Unknown knowns</h4><p>言葉にしていない好み。見れば分かる。</p><div class="m"><b>打ち手</b> 試作に反応して引き出す</div></div>
+      <div class="q hot"><span class="t">認識なし × 把握なし</span><h4>Unknown unknowns</h4><p>考慮の外。存在に気づいていない盲点。</p><div class="m"><b>打ち手</b> 盲点洗いで炙り出す</div></div>
+    </div>
+  </figure>
+
+  <p>ここで手を貸せるのが Claude 自身だ。コードもネットも速く読むし、失敗からの立て直しも速い。効かせるコツは1つ、<em>自分の立ち位置を先に渡す</em>こと。このコードベースにどれくらい慣れているか、このドメインをどれくらい知っているかを開示する。それだけで Claude の振る舞いが変わる。相手を「実行係」ではなく「相談相手」として使うということだ。</p>
+</section>
+
+<hr class="rule">
+
+<section>
+  <h2><span class="no">04</span>前・最中・後で、不明点を狩る</h2>
+
+  <h3>実装の前</h3>
+  <p>いきなり書かせない。まず盲点洗いをやる。「blind spot pass」「unknown unknowns」と言葉にして、考慮から漏れているものを挙げさせ、<em>それを説明させる</em>。ここが肝で、盲点は列挙されても意味が薄い。Claude がその背景を噛み砕いて教えてくれて初めて、次のプロンプトを知識で書ける。</p>
+  <p>インタビューは1問ずつ。しかも塗装の色ではなく、アーキテクチャを変える質問から。「重複行はスキップか上書きか」は後の全実装に響くが、「ボタンの角丸は何 px か」はいつでも直せる。各質問に推奨案を添えさせると、あなたは一言で採否できる。</p>
+  <p>言葉にしにくい好み（unknown knowns）は、説明を求めるより<em>反応させる</em>ほうが早い。デザインなら、1案の色違いではなく、方向性からして違う3〜4案を捨て前提の HTML で出させ、どれが刺さるか反応する。プロトタイプにはもう1つ役がある。技術的にそもそも可能かを試す捨てスパイクだ。バックエンドを配線せず、動くかどうかだけ見る。</p>
+
+  <p>ただし、反応が効くのは<span class="sig">「見れば良し悪しが分かる」ときだけ</span>だ。見ても判定できない領域では、選択肢を並べても選べない。元記事のいちばん鋭い教訓がここにある。</p>
+  <blockquote>
+    最初は何案か出して選ぶつもりだった。だが自分が「良い」が何か分かっていないと気づいた。だから選ぶのをやめ、Claude にカラーグレーディングそのものを教えてもらった。
+    <span class="who">— Fable 5 ローンチ動画を Claude Code だけで作った話より（要約）</span>
+  </blockquote>
+  <p>選ぶ前に、教わる。判定基準を持ってから選択肢に向かう。参照を渡すときも同じ発想で、いちばん richな参照はスクショや言葉ではなく<em>ソースコード</em>だ。別言語でも構わない。「このフォルダの、この部分を見て」と示すのがいちばん速い。</p>
+  <p>最後に計画。並び順に意味を持たせる。<em>変わりやすいもの（データモデル・型の境界・UX フロー）を先頭</em>に置く。ここがずれると波及が大きい。機械的なリファクタは末尾でいい。</p>
+
+  <h3>実装の最中</h3>
+  <p>どれだけ計画しても、土地は必ず何か返してくる。計画になかった判断を迫られた場所こそ、リアルタイムに現れた不明点だ。<code>implementation-notes.md</code> に3行で残す。Plan（計画は何と言っていたか）、Did（実際に何をしたか）、Why（土地が何を教えたか）。進捗ログではない。判断と驚きだけを書く。「インポータを実装した」は要らない。「アーカイブ済み行に API が null を返すので、インポータはそれを飛ばす」が要る。判断に迷ったら保守的な方を既定にして、記録して先に進む。可逆な選択でパスを止めない。</p>
+
+  <h3>実装の後</h3>
+  <p>2つの成果物で、信頼を証明に変える。1つはピッチ。プロトタイプ・仕様・ノートを1枚に束ね、先頭にデモ GIF を置く。人は動くところを見せられると承認が速い。相手は2種類いる。あなたと同じ不明点から出発するレビュアと、失敗点を潰したか確かめたい専門家だ。もう1つはクイズ。変更について自分に問題を出し、<span class="sig">全問に正しく答えられるまで merge しない</span>。答えられない問いは、まだ diff に残った不明点だ。エージェントが書いた変更なら、人間が受験する。diff を眺めるだけでは浅い。挙動は既存のコードパスに依存するし、長いセッションの後は自分が思うより先に進んでいる。</p>
+</section>
+
+<hr class="rule">
+
+<section>
+  <h2><span class="no">05</span>指示は、細すぎても粗すぎても外れる</h2>
+  <p>これは覚えておく価値がある。指示を細かく書きすぎると、方向転換すべき場面でも書いた手順に固執する。ざっくりしすぎると、あなたの案件に合わない「業界の定石」で勝手に埋める。狙うのは中間、意図は伝えつつ適応の余地を残す線だ。そして繰り返すが、結果が間違っていたら、まず疑うのは語尾ではなく unknowns の定義のほうだ。</p>
+</section>
+
+<hr class="rule">
+
+<section>
+  <h2><span class="no">06</span>これを、スキルにした</h2>
+  <p>ここまでの手順は、毎回手で思い出すには多い。だから <code>finding-unknowns</code> プラグインにまとめ、Claude Code が場面に応じて自分で引っ張れるようにした。導入は2行。</p>
+  <pre><span class="c"># Claude Code のプロンプトで</span>
+/plugin marketplace add SHU-T0/claude-tips
+/plugin install finding-unknowns@claude-tips</pre>
+
+  <p>中身は、前・最中・後にそのまま対応する。</p>
+  <figure>
+    <figcaption><b>図3</b> &nbsp;どのスキルが、いつ動くか</figcaption>
+    <div class="flow">
+      <div class="fr"><span class="ph">前</span><div class="bd"><span class="nm">map-unknowns</span><p>タスクが曖昧・不慣れ・「見れば分かる」系のとき、計画を固める前に。4象限を順に歩き、<code>unknowns-map.md</code> と揮発順の計画を残す。手動なら <code>/finding-unknowns:unknowns &lt;タスク&gt;</code>。</p></div></div>
+      <div class="fr"><span class="ph">前 · 分岐</span><div class="bd"><span class="nm">learn-the-domain</span><p>出力の良し悪しを自分が判定できない、仕組みが分からないとき。選ぶ前に Claude に教わって判定基準を持つ。</p></div></div>
+      <div class="fr"><span class="ph">前 · 補助</span><div class="bd"><span class="nm">blind-spot-scout</span><p>まっさらな第三の目のサブエージェント。口にされていない前提や見落とされた失敗モードを洗う。map-unknowns から呼ばれる。</p></div></div>
+      <div class="fr"><span class="ph">最中</span><div class="bd"><span class="nm">implementation-notes</span><p>計画から外れた・エッジケース・判断したことを <code>implementation-notes.md</code> に3行で残す。</p></div></div>
+      <div class="fr"><span class="ph">後</span><div class="bd"><span class="nm">verify-understanding</span><p>マージ前。デモ先出しのピッチ＋クイズ。全問通るまで merge しない。</p></div></div>
+    </div>
+  </figure>
+
+  <h3>ひと通り回すと、こうなる</h3>
+  <p>「請求テーブル用の CSV インポータを作って」を、このプラグインで回した場合を追ってみる。</p>
+  <pre>/finding-unknowns:unknowns 請求テーブル用の CSV インポータ</pre>
+  <p><strong>1.</strong> map-unknowns が起動し、まず「あなたはこのコードベースと CSV 取り込みにどれくらい慣れているか」を聞く。ここを答えるかどうかで、後の質問の精度が変わる。<br>
+  <strong>2.</strong> 既知を確定する（請求テーブルのスキーマ、既存のバリデーション規約）。次に、アーキテクチャを変える質問から1問ずつ。「重複行はスキップか上書きか」「文字コードは UTF-8 固定でよいか」。各質問に推奨案が付くので、一言で返せる。<br>
+  <strong>3.</strong> 「良い CSV インポータ」を自分が判定できないと気づいたら、learn-the-domain に落ちる。ストリーミングパースやエラー行の扱いの定石を教わってから戻る。<br>
+  <strong>4.</strong> blind-spot-scout が走り、誰も言っていない前提を洗う。「アーカイブ済み行に API が null を返す」「10万行だと一括 INSERT がタイムアウトする」。<br>
+  <strong>5.</strong> 揮発順（データモデル→型→UX フロー）に並べた計画と <code>unknowns-map.md</code> が手渡される。<span class="sig">ここでは実装しない。</span><br>
+  <strong>6.</strong> 実装は新しいセッションで。map と計画とプロトタイプを持ち込み、汚れていないコンテキストで書く。逸脱したら <code>implementation-notes.md</code> に3行、迷ったら保守的な方を選んで進む。<br>
+  <strong>7.</strong> マージ前に verify-understanding。デモ GIF を先頭に、変更点と危ない箇所を1枚のピッチに束ねる。変更を書いていない側がクイズに答え、全問通るまで merge しない。</p>
+  <p>各スキルは単体でも使える。曖昧なタスクに着手する、判定基準がないまま案を並べそうになる、変更をマージしようとする。そのたびに、対応するスキルが description のトリガーで自分から立ち上がる。</p>
+</section>
+
+<hr class="rule">
+
+<section>
+  <h2><span class="no">07</span>まとめ</h2>
+  <p>賢いモデルを前にした仕事は、「手を動かす」から「不明点を定義し、検証を設計し、正しい場所に指示を置く」へ移る。次に何か作るときは、まず Claude に自分の不明点探しを手伝わせる。実装は、霧が晴れてからでいい。</p>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="col">
+    原典：<a href="https://claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns">A field guide to Claude Fable: finding your unknowns</a>（claude.com/blog）<br>
+    プラグイン：<a href="https://github.com/SHU-T0/claude-tips">github.com/SHU-T0/claude-tips</a> · <code>finding-unknowns</code>（MIT）
+    <div class="mono">field notes · finding your unknowns</div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -12,6 +12,11 @@ Surface a task's unknowns *before, during, and after* implementation — a
 and a `blind-spot-scout` subagent.
 Based on Anthropic's *[A field guide to Claude Fable: finding your unknowns](https://claude.com/blog/a-field-guide-to-claude-fable-finding-your-unknowns)*.
 
+📖 **Guide (日本語):** [`docs/index.html`](docs/index.html) — the method and the
+plugin, written out with a worked example. Turn on GitHub Pages
+(Settings → Pages → `main` / `docs`) to read it at
+`https://shu-t0.github.io/claude-tips/`.
+
 ## Install
 
 ```
