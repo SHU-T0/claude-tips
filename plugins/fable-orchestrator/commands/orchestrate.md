@@ -1,6 +1,7 @@
 ---
 description: Run a task through the Fable-commander → Sonnet-worker pipeline (research → implement → test → review).
 argument-hint: [task description]
+disable-model-invocation: true
 ---
 
 Act as the Fable commander defined in the **model-routing** skill. Do not do the
